@@ -1,36 +1,43 @@
-// Импортируем компоненты Formik: Formik (обёртка формы), Form (элемент формы), Field (поле ввода)
-import { Formik, Form, Field } from "formik";
+import { Formik, Form, Field, ErrorMessage } from "formik";
+import * as Yup from "yup";
 
-// Объявляем и экспортируем компонент ContactForm
-// Принимает пропс onAdd — функцию, которая вызывается при добавлении нового контакта
+const ContactSchema = Yup.object().shape({
+  name: Yup.string()
+    .min(2, "Too short!")
+    .max(50, "Too long!")
+    .required("Name is required"),
+  number: Yup.string()
+    .matches(/^[0-9\s\-()+]+$/, "Phone number is not valid")
+    .required("Number is required"),
+});
+
 export default function ContactForm({ onAdd }) {
   return (
-    // Компонент <Formik> управляет состоянием и отправкой формы
     <Formik
-      // Задаём начальные значения полей формы (пустые строки)
       initialValues={{ name: "", number: "" }}
-      // Обработчик отправки формы
+      validationSchema={ContactSchema}
       onSubmit={(values, actions) => {
-        onAdd(values); // Передаём введённые значения (name и number) в функцию onAdd
-        actions.resetForm(); // Очищаем поля формы после отправки
+        onAdd(values);
+        actions.resetForm();
       }}
     >
-      {/* Компонент <Form> заменяет обычный <form> и работает с Formik */}
       <Form>
-        {/* Метка и поле ввода имени */}
         <label>
           Name
-          {/* Field автоматически подключается к Formik и обновляет состояние формы */}
           <Field name="name" />
+          <ErrorMessage name="name" component="div" style={{ color: "red" }} />
         </label>
 
-        {/* Метка и поле ввода номера телефона */}
         <label>
           Number
           <Field name="number" />
+          <ErrorMessage
+            name="number"
+            component="div"
+            style={{ color: "red" }}
+          />
         </label>
 
-        {/* Кнопка отправки формы */}
         <button type="submit">Add contact</button>
       </Form>
     </Formik>
