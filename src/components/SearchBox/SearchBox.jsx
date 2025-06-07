@@ -1,22 +1,18 @@
-// Объявляем и экспортируем компонент SearchBox по умолчанию
-// Принимает два пропса:
-// - value: текущее значение фильтра (строка)
-// - onFilter: функция, вызываемая при изменении ввода
-export default function SearchBox({ value, onFilter }) {
+import { useDispatch, useSelector } from "react-redux";
+import { changeFilter } from "../../redux/filtersSlice";
+
+export default function SearchBox() {
+  const dispatch = useDispatch();
+  const filter = useSelector((state) => state.filters.name);
+
+  const handleChange = (e) => {
+    dispatch(changeFilter(e.target.value));
+  };
+
   return (
-    // Контейнер для поля поиска
-    <div>
-      {/* Метка и поле ввода */}
-      <label>
-        Find contacts by name:
-        {/* Поле ввода текста */}
-        <input
-          type="text" // Тип поля — текст
-          value={value} // Устанавливаем текущее значение из пропса value
-          onChange={(e) => onFilter(e.target.value)}
-          // При изменении текста вызываем onFilter, передавая новое значение поля
-        />
-      </label>
-    </div>
+    <label>
+      Find contacts by name:
+      <input type="text" value={filter} onChange={handleChange} />
+    </label>
   );
 }

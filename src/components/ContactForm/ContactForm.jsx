@@ -1,6 +1,9 @@
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
 
+import { useSelector, useDispatch } from "react-redux";
+import { addContact } from "../../redux/contactsSlice";
+
 const ContactSchema = Yup.object().shape({
   name: Yup.string()
     .min(2, "Too short!")
@@ -11,13 +14,26 @@ const ContactSchema = Yup.object().shape({
     .required("Number is required"),
 });
 
-export default function ContactForm({ onAdd }) {
+export default function ContactForm() {
+  const dispatch = useDispatch();
+  const contacts = useSelector((state) => state.contacts.items);
   return (
     <Formik
       initialValues={{ name: "", number: "" }}
       validationSchema={ContactSchema}
       onSubmit={(values, actions) => {
-        onAdd(values);
+        const isDuplicate = contacts.some(
+          (contact) =>
+            typeof contact.name === "string" &&
+            contact.name.toLowerCase() === values.name.toLowerCase()
+        );
+
+        if (isDuplicate) {
+          alert(`${values.name}  is already in contacts`);
+          return;
+        }
+
+        dispatch(addContact(values));
         actions.resetForm();
       }}
     >
