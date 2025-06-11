@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { addContact, deleteContact, setContacts } from "./redux/contactsSlice";
+import { fetchContacts, addContact, deleteContact } from "./redux/contactsOps";
 import { changeFilter } from "./redux/filtersSlice";
 
 import ContactList from "./components/ContactList/ContactList";
@@ -13,17 +13,12 @@ function App() {
   const dispatch = useDispatch();
   const contacts = useSelector((state) => state.contacts.items);
   const filter = useSelector((state) => state.filters.name);
+  const loading = useSelector((state) => state.contacts.loading);
+  const error = useSelector((state) => state.contacts.error);
 
   useEffect(() => {
-    const saved = localStorage.getItem("contacts");
-    if (saved) {
-      dispatch(setContacts(JSON.parse(saved)));
-    }
+    dispatch(fetchContacts());
   }, [dispatch]);
-
-  useEffect(() => {
-    localStorage.setItem("contacts", JSON.stringify(contacts));
-  }, [contacts]);
 
   const handleAddContact = (contact) => {
     dispatch(addContact(contact));
@@ -43,12 +38,14 @@ function App() {
   });
 
   return (
-    <div>
-      <h1>Phonebook</h1>
+    <>
+      <h1>PhoneBook</h1>
       <ContactForm onAdd={handleAddContact} />
       <SearchBox value={filter} onFilter={handleFilterChange} />
+      {loading && <p>Loading...</p>}
+      {error && <p style={{ color: "red" }}>{error}</p>}
       <ContactList contacts={filteredContacts} onDelete={handleDeleteContact} />
-    </div>
+    </>
   );
 }
 
