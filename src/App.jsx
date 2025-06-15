@@ -1,51 +1,45 @@
 import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { fetchContacts, addContact, deleteContact } from "./redux/contactsOps";
-import { changeFilter } from "./redux/filtersSlice";
+import { refreshUser } from "./redux/auth/operations";
+import { Routes, Route } from "react-router-dom";
 
-import ContactList from "./components/ContactList/ContactList";
-import ContactForm from "./components/ContactForm/ContactForm";
-import SearchBox from "./components/SearchBox/SearchBox";
+import Layout from "./components/Layout/Layout";
+import HomePage from "./pages/HomePage";
+import LoginPage from "./pages/LoginPage";
+import RegistrationPage from "./pages/RegistrationPage";
+import ContactsPage from "./pages/ContactsPage";
 
-import "./App.css";
+import PrivateRoute from "./components/PrivateRoute/PrivateRoute";
+import RestrictedRoute from "./components/RestrictedRoute/RestrictedRoute";
 
 function App() {
   const dispatch = useDispatch();
-  const contacts = useSelector((state) => state.contacts.items);
-  const filter = useSelector((state) => state.filters.name);
-  const loading = useSelector((state) => state.contacts.loading);
-  const error = useSelector((state) => state.contacts.error);
+  const isRefreshing = useSelector((state) => state.auth.isRefreshing);
 
   useEffect(() => {
-    dispatch(fetchContacts());
+    dispatch(refreshUser());
   }, [dispatch]);
 
-  const handleAddContact = (contact) => {
-    dispatch(addContact(contact));
-  };
-
-  const handleDeleteContact = (id) => {
-    dispatch(deleteContact(id));
-  };
-
-  const handleFilterChange = (value) => {
-    dispatch(changeFilter(value));
-  };
-
-  const filteredContacts = contacts.filter((contact) => {
-    if (!contact.name || typeof contact.name !== "string") return false;
-    return contact.name.toLowerCase().includes(filter.toLowerCase());
-  });
+  if (isRefreshing) return <p>Refreshing user...</p>;
 
   return (
-    <>
-      <h1>PhoneBook</h1>
-      <ContactForm onAdd={handleAddContact} />
-      <SearchBox value={filter} onFilter={handleFilterChange} />
-      {loading && <p>Loading...</p>}
-      {error && <p style={{ color: "red" }}>{error}</p>}
-      <ContactList contacts={filteredContacts} onDelete={handleDeleteContact} />
-    </>
+    <Routes>
+      <Route path="/" element={<Layout />}>
+        <Route index element={<HomePage />} />
+        <Route
+          path="register"
+          element={<RestrictedRoute component={RegistrationPage} />}
+        />
+        <Route
+          path="login"
+          element={<RestrictedRoute component={LoginPage} />}
+        />
+        <Route
+          path="contacts"
+          element={<PrivateRoute component={ContactsPage} />}
+        />
+      </Route>
+    </Routes>
   );
 }
 
