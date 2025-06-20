@@ -4,6 +4,8 @@ import axios from "axios";
 
 axios.defaults.baseURL = "https://connections-api.goit.global";
 
+const getToken = (thunkAPI) => thunkAPI.getState().auth.token;
+
 const register = createAsyncThunk(
   "user/register",
   async (userData, thunkAPI) => {
@@ -28,8 +30,7 @@ const login = createAsyncThunk("user/login", async (userData, thunkAPI) => {
 });
 
 const logout = createAsyncThunk("user/logout", async (_, thunkAPI) => {
-  const state = thunkAPI.getState();
-  const token = state.auth.token;
+  const token = getToken(thunkAPI);
 
   if (!token) {
     return thunkAPI.rejectWithValue("No token found");
@@ -52,8 +53,7 @@ const logout = createAsyncThunk("user/logout", async (_, thunkAPI) => {
 });
 
 const refreshUser = createAsyncThunk("user/refresh", async (_, thunkAPI) => {
-  const state = thunkAPI.getState();
-  const token = state.auth.token;
+  const token = getToken(thunkAPI);
 
   if (!token) {
     return thunkAPI.rejectWithValue("No token");
